@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: solana-meme-tracker
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -u bot.py
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: HELIUS_API_KEY
+        sync: false
+      - key: SCAN_INTERVAL_SECONDS
+        value: "30"
+      - key: DEFAULT_SCAN_MODE
+        value: medium
+      - key: REQUEST_TIMEOUT
+        value: "20"
+      - key: MAX_RETRIES
+        value: "3"
+      - key: TRACKING_WINDOW_HOURS
+        value: "24"
+      - key: DISCORD_SEND_DELAY
+        value: "1.5"
+      - key: DISCORD_MAX_RETRIES
+        value: "5"
+      - key: DISCORD_LOGIN_RETRY_INITIAL
+        value: "120"
+      - key: DISCORD_LOGIN_RETRY_MAX
+        value: "600"
+      - key: DEXSCREENER_FAILURE_THRESHOLD
+        value: "3"
+      - key: WIPE_GUILD_COMMANDS
+        value: "false"

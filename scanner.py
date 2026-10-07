@@ -21,6 +21,7 @@ from wallets import WalletTracker
 
 
 MIGRATION_MC_CEILING = 100_000
+MIGRATION_MC_FLOOR = 5_000
 MIGRATION_FLAG = "migrated"
 
 
@@ -248,6 +249,9 @@ class Scanner:
         if not mint or not is_valid_solana_address(mint):
             return
 
+        # Serialize concurrent events for the same mint. Create + migrate
+        # can arrive back-to-back; without this, both go through the pipeline
+        # and can produce duplicate alerts.
         if mint in self._in_flight_mints:
             return
         self._in_flight_mints.add(mint)
@@ -258,6 +262,7 @@ class Scanner:
 
     async def _process_token_locked(self, mint, token_data):
         existing_coin = await self.db.get_coin_by_mint(mint)
+        # Highest band already sent — nothing more to do.
         if existing_coin and existing_coin.get("alerted_high"):
             return
 
@@ -287,6 +292,8 @@ class Scanner:
         created_at = token_data.get("created_at")
         token_data["age_seconds"] = (time.time() - created_at) if created_at else None
 
+        # Early-buyer analysis is RPC-heavy. Only spend that budget once
+        # we have usable market data.
         if token_data.get("market_cap") and token_data.get("liquidity"):
             analysis = await self._analyze_early_buyers(mint, token_data)
             token_data.update(analysis)
@@ -494,6 +501,7 @@ class Scanner:
 
         fresh_mc = market.get("market_cap") if market else None
 
+        # Migration must have fresh, non-null market data. No guessing.
         if fresh_mc is None:
             print(f"Migration suppressed for {mint[:8]}: no fresh market data")
             if coin:
@@ -505,6 +513,16 @@ class Scanner:
             print(
                 f"Migration suppressed for {mint[:8]}: "
                 f"MC ${fresh_mc:,.0f} > ceiling ${MIGRATION_MC_CEILING:,}"
+            )
+            if coin:
+                flag_set.add(MIGRATION_FLAG)
+                await self.db.set_red_flags(coin["id"], ",".join(sorted(flag_set)))
+            return
+
+        if fresh_mc < MIGRATION_MC_FLOOR:
+            print(
+                f"Migration suppressed for {mint[:8]}: "
+                f"MC ${fresh_mc:,.0f} < floor ${MIGRATION_MC_FLOOR:,} (dead/rug)"
             )
             if coin:
                 flag_set.add(MIGRATION_FLAG)
@@ -548,6 +566,8 @@ class Scanner:
         if market:
             fresh["current_market_cap"] = market.get("market_cap")
             fresh["image_url"] = market.get("image_url") or coin.get("image_url")
+        # Keep first-seen values for the embed. They were already stored
+        # when the token was first processed — do not wipe them.
         fresh["first_seen_market_cap"] = coin.get("first_seen_market_cap")
         fresh["first_seen_price"] = coin.get("first_seen_price")
 
@@ -786,6 +806,8 @@ class Scanner:
             print(f"Milestone alert error: {type(e).__name__}: {e}")
 
     def is_expired(self, coin):
+        # Base expiry on creation time, not last_tracked_at (which is
+        # refreshed on every cycle and would make this always False).
         created = coin.get("created_at")
         if created is None:
             return False

@@ -180,7 +180,7 @@ class TokenEnricher:
 
             def _liq(p):
                 try:
-                    return float((p.get("liqu("usd", 0) or 0)
+                    return float((p.get("liquidity") or {}).get("usd", 0) or 0)
                 except (TypeError, ValueError):
                     return 0.0
 

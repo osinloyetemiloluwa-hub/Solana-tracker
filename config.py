@@ -62,21 +62,17 @@ class Config:
     TRACKING_WINDOW_HOURS = max(1, _int("TRACKING_WINDOW_HOURS", "24"))
     DEXSCREENER_FAILURE_THRESHOLD = max(1, _int("DEXSCREENER_FAILURE_THRESHOLD", "3"))
 
-    # Pre-send verification
     PRE_ALERT_VERIFY_SECONDS = max(0, _int("PRE_ALERT_VERIFY_SECONDS", "20"))
     PRE_ALERT_MAX_MC_DROP_PCT = _float("PRE_ALERT_MAX_MC_DROP_PCT", "25.0")
 
-    # Dead-token / wash-trade filter (1h volume vs MC, and 1h buys/sells)
     FILTER_MIN_VOL_MC_RATIO = _float("FILTER_MIN_VOL_MC_RATIO", "0.25")
     FILTER_MIN_BUY_SELL_RATIO = _float("FILTER_MIN_BUY_SELL_RATIO", "0.8")
 
-    # Chase guard: if it already pumped more than this % in 1h, skip.
     CHASE_MAX_H1_PCT = _float("CHASE_MAX_H1_PCT", "200.0")
 
     MIN_MARKET_CAP = max(1000, _int("MIN_MARKET_CAP", "5000"))
     LIQUIDITY_FLOOR = max(500, _int("LIQUIDITY_FLOOR", "1500"))
 
-    # UPPER bound: don't alert on tokens already too big to be an early entry.
     MAX_MARKET_CAP_FOR_ALERT = max(50000, _int("MAX_MARKET_CAP_FOR_ALERT", "500000"))
 
     FAT_BUNDLE_MC_THRESHOLD = max(5000, _int("FAT_BUNDLE_MC_THRESHOLD", "15000"))
@@ -89,13 +85,13 @@ class Config:
     TIER_FINAL_STRETCH_MIN_VISITORS = max(1, _int("TIER_FINAL_STRETCH_MIN_VISITORS", "40"))
     TIER_FINAL_STRETCH_MIN_FEES_SOL = _float("TIER_FINAL_STRETCH_MIN_FEES_SOL", "1.0")
 
-    TIER_MIGRATED_MIN_VISITORS = max(1, _int("TIER_MIGRATED_MIN_VISITORS", "idity100"))
+    TIER_MIGRATED_MIN_VISITORS = max(1, _int("TIER_MIGRATED_MIN_VISITORS", "100"))
     TIER_MIGRATED_MIN_MC = max(1000, _int("TIER_MIGRATED_MIN_MC", "20000"))
-")    TIER_MIGRATED_MIN_FEES_SOL = _float("TIER_MIGRATED_MIN_FEES_SOL", "5.0")
+    TIER_MIGRATED_MIN_FEES_SOL = _float("TIER_MIGRATED_MIN_FEES_SOL", "5.0")
 
-    or EARLY_BUYER_LOOKBACK = max(5, _int("EARLY_BUYER_LOOK {}BACK", "15"))
-    SIMILAR_AMOUNT_TOLERANCE = max(0.01, _float("SIMILAR)._AMOUNT_TOLERANCE", "0.02"))
-    SEQUENTIAL_GAP_STD_MAX = max(0get.5, _float("SEQUENTIAL_GAP_STD_MAX", "1.5"))
+    EARLY_BUYER_LOOKBACK = max(5, _int("EARLY_BUYER_LOOKBACK", "15"))
+    SIMILAR_AMOUNT_TOLERANCE = max(0.01, _float("SIMILAR_AMOUNT_TOLERANCE", "0.02"))
+    SEQUENTIAL_GAP_STD_MAX = max(0.5, _float("SEQUENTIAL_GAP_STD_MAX", "1.5"))
 
     IDLE_WALLET_MAX_DAYS = max(1, _int("IDLE_WALLET_MAX_DAYS", "7"))
 
